@@ -5,8 +5,8 @@
 #include <ros/ros.h>
 
 #include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
-#include <opencv2/contrib/contrib.hpp>
+//#include <opencv2/gpu/gpu.hpp>
+//#include <opencv2/contrib/contrib.hpp>
 
 #include <tf/transform_broadcaster.h>
 #include <message_filters/subscriber.h>
@@ -24,6 +24,8 @@
 #include <geometry_msgs/PointStamped.h>
 #include <cv_bridge/cv_bridge.h>
 #include <nav_msgs/Odometry.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/point_cloud.h>
 
 #include <Eigen/Dense>
 #include <opencv/cxeigen.hpp>
@@ -53,6 +55,7 @@ int debug_param3;
 int debug_param4;
 int debug_param5;
 FILE *f_out;
+//std::ofstream ofs;
 
 ros::Publisher pub_point_cloud2;
 ros::Publisher pub_point_cloud_ref;
@@ -249,6 +252,13 @@ void sendCloud(const cv::Mat &dense_points_, const cv::Mat &un_img_l0)
         }
     }
     pub_point_cloud2.publish(points);
+
+    static int count = 0;
+    char buf[200];
+    snprintf(buf, 200, "%06d.pcd", count++);
+    pcl::PointCloud<pcl::PointXYZ> pc;
+    pcl::fromROSMsg(*points, pc);
+    pcl::io::savePCDFile("/home/mylxiaoyi/work/ros_vins/points/"+std::string(buf), pc);
 }
 int image_id = 0;
 
@@ -494,7 +504,7 @@ cv::Mat showColorDep(const cv::Mat &result)
 //    }
 //}
 
-cv::StereoBM bm(cv::StereoBM::BASIC_PRESET, 128, 21);
+cv::Ptr<cv::StereoBM> bm = cv::StereoBM::create(128, 21);
 
 cv::Mat blockMatching(const std::string name, const cv::Mat &img_l, const cv::Mat &img_r)
 {
@@ -514,7 +524,7 @@ cv::Mat blockMatching(const std::string name, const cv::Mat &img_l, const cv::Ma
 
     cv::Mat disp_16, disp;
     cv::Mat_<cv::Vec3f> dense_points_;
-    bm(img_ll, img_rr, disp_16);
+    bm->compute(img_ll, img_rr, disp_16);
     disp_16.convertTo(disp, CV_32F, 1.0f / 16);
     cv::reprojectImageTo3D(disp, dense_points_, Q, true);
     sendCloud2(dense_points_, img_ll);
@@ -558,13 +568,17 @@ void callback_raw_image(
     const sensor_msgs::ImageConstPtr &img_l_msg,
     const sensor_msgs::ImageConstPtr &img_r_msg)
 {
-    ROS_INFO("save images with header: %f", img_l_msg->header.stamp.toSec());
+//    ROS_INFO("save images with header: %f", img_l_msg->header.stamp.toSec());
     cv_bridge::CvImagePtr img_l_ptr = cv_bridge::toCvCopy(img_l_msg, sensor_msgs::image_encodings::MONO8);
     img_pool[std::to_string(img_l_ptr->header.stamp.toNSec())] = img_l_ptr->image.clone();
     cv_bridge::CvImagePtr img_r_ptr = cv_bridge::toCvCopy(img_r_msg, sensor_msgs::image_encodings::MONO8);
     img_pool_r[std::to_string(img_r_ptr->header.stamp.toNSec())] = img_r_ptr->image.clone();
     char str[100];
     std::string name = std::to_string(img_l_ptr->header.stamp.toNSec());
+    std::string name_l = std::to_string(img_l_ptr->header.stamp.toNSec()) + ".jpg";
+    std::string name_r = std::to_string(img_r_ptr->header.stamp.toNSec()) + ".jpg";
+    cv::imwrite("/home/mylxiaoyi/work/ros_vins/test/"+name_l, img_l_ptr->image);
+    cv::imwrite("/home/mylxiaoyi/work/ros_vins/test/"+name_r, img_r_ptr->image);
 
 #if OFFLINE
     cv::Mat img_ll, img_rr;
@@ -595,15 +609,27 @@ void callback_raw_image(
 
 std::string last_time;
 cv::Mat result;
+std::ofstream ofs;
 
 void callback_raw_pose(const geometry_msgs::PoseStampedConstPtr &ref_pose_ptr,
                        const geometry_msgs::PoseStampedConstPtr &cur_pose_ptr)
 {
+//    ROS_INFO_STREAM("hello from callback_raw_pose");
     double t = clock();
     std::string ref_time = ref_pose_ptr->header.frame_id;
     std::string cur_time = cur_pose_ptr->header.frame_id;
     std::map<std::string, cv::Mat>::iterator ref_it = img_pool.find(ref_time);
     std::map<std::string, cv::Mat>::iterator cur_it = img_pool.find(cur_time);
+
+//    ofs << ref_time << " " << ref_pose_ptr->pose.position.x << " " << ref_pose_ptr->pose.position.y
+//        << " " << ref_pose_ptr->pose.position.z << " " << ref_pose_ptr->pose.orientation.x
+//        << " " << ref_pose_ptr->pose.orientation.y << " " << ref_pose_ptr->pose.orientation.z
+//        << " " << ref_pose_ptr->pose.orientation.w << std::endl;
+//    ofs << cur_time << " " << cur_pose_ptr->pose.position.x << " " << cur_pose_ptr->pose.position.y
+//        << " " << cur_pose_ptr->pose.position.z << " " << cur_pose_ptr->pose.orientation.x
+//        << " " << cur_pose_ptr->pose.orientation.y << " " << cur_pose_ptr->pose.orientation.z
+//        << " " << cur_pose_ptr->pose.orientation.w << " " << ref_time << std::endl;
+
     //img_pool.erase(img_pool.begin(), ref_it);
     if (ref_it != img_pool.end() && cur_it != img_pool.end())
     {
@@ -617,6 +643,16 @@ void callback_raw_pose(const geometry_msgs::PoseStampedConstPtr &ref_pose_ptr,
         cv::Mat bm_result;
         cv::reprojectImageTo3D(disp, bm_result, Q, true);
 #endif
+        ofs.open("/home/mylxiaoyi/work/ros_vins/test/trajectory.txt", std::ofstream::app);
+        ofs << ref_time << " " << ref_pose_ptr->pose.position.x << " " << ref_pose_ptr->pose.position.y
+            << " " << ref_pose_ptr->pose.position.z << " " << ref_pose_ptr->pose.orientation.x
+            << " " << ref_pose_ptr->pose.orientation.y << " " << ref_pose_ptr->pose.orientation.z
+            << " " << ref_pose_ptr->pose.orientation.w << " " << 0 << std::endl;
+        ofs << cur_time << " " << cur_pose_ptr->pose.position.x << " " << cur_pose_ptr->pose.position.y
+            << " " << cur_pose_ptr->pose.position.z << " " << cur_pose_ptr->pose.orientation.x
+            << " " << cur_pose_ptr->pose.orientation.y << " " << cur_pose_ptr->pose.orientation.z
+            << " " << cur_pose_ptr->pose.orientation.w << " " << ref_time << std::endl;
+        ofs.close();
         Eigen::Matrix3d R_l = Eigen::Quaterniond{ref_pose_ptr->pose.orientation.w,
                                                  ref_pose_ptr->pose.orientation.x,
                                                  ref_pose_ptr->pose.orientation.y,
@@ -906,7 +942,8 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "stereo_mapper");
     ros::NodeHandle n("~");
-    f_out = fopen("/home/yzf/outliers.txt", "w");
+//    f_out = fopen("/home/yzf/outliers.txt", "w");
+//    ofs.open("/home/mylxiaoyi/work/ros_vins/test/trajectory.txt");
 
     ROS_INFO("read parameter");
 
@@ -915,16 +952,21 @@ int main(int argc, char **argv)
 
     std::cout << CALIB_DIR + CAM_NAME + "/left.yml" << std::endl;
     cv::FileStorage param_reader_l(CALIB_DIR + CAM_NAME + "/left.yml", cv::FileStorage::READ);
+    ROS_INFO("read camera parameters");
     param_reader_l["camera_matrix"] >> K1;
     param_reader_l["distortion_coefficients"] >> D1;
+    ROS_INFO("read camera parameters finished");
 /*
     param_reader_l["T_BS"] >> T_BS;
     cv::cv2eigen(T_BS.rowRange(0, 3).colRange(0, 3), R_bs);
     cv::cv2eigen(T_BS.rowRange(0, 3).colRange(3, 4), P_bs);
 */
 
+    ROS_INFO("K1 convert to eigen");
     cv::cv2eigen(K1, K_eigen);
-    cv::cv2eigen(K, K_eigen);
+    ROS_INFO("K convert to eigen K.empty = %d", K.empty());
+//    cv::cv2eigen(K, K_eigen);
+    ROS_INFO("convert finished");
     std::cout << K_eigen << std::endl;
     mapper.initIntrinsic(K1, D1, K1, D1);
 
@@ -996,5 +1038,7 @@ int main(int argc, char **argv)
     server.setCallback(f);
 
     ros::spin();
+
+//    ofs.close();
     return 0;
 }

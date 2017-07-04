@@ -1,5 +1,6 @@
 <launch>
-    <node name="stereo_mapper" pkg="stereo_mapper" type="stereo_mapper" output="screen" launch-prefix="taskset -c 1">
+    <!-- <node name="stereo_mapper" pkg="stereo_mapper" type="stereo_mapper" output="screen" launch-prefix="taskset -c 1"> -->
+    <node name="stereo_mapper" pkg="stereo_mapper" type="stereo_mapper" output="screen">
         <param name="calib_dir" type="string" value="$(find stereo_mapper)/calib/" />
         <param name="cam_name" type="string" value="lin4" />
         <remap from="~image_l" to="/cam1/image_raw" />

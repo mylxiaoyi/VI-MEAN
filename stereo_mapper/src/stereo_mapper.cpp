@@ -38,13 +38,13 @@ void StereoMapper::initReference(const cv::Mat &_img_l)
     _img_l.convertTo(tmp_img, CV_32F);
     raw_img_l.upload(tmp_img);
 
-    cv::gpu::remap(raw_img_l, img_l, map1_l, map2_l, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+    cv::cuda::remap(raw_img_l, img_l, map1_l, map2_l, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 
     img_l.download(tmp_img);
     tmp_img.convertTo(img_intensity, CV_8U);
 
-    //cv::imwrite("/home/ubuntu/left.jpg", img_intensity);
-    //cv::imwrite("/home/ubuntu/raw_left.jpg", _img_l);
+    cv::imwrite("/home/mylxiaoyi/left.jpg", img_intensity);
+    cv::imwrite("/home/mylxiaoyi/raw_left.jpg", _img_l);
 
     measurement_cnt = 0;
 }
@@ -59,7 +59,7 @@ void StereoMapper::update(const cv::Mat &_img_r, const cv::Mat &R_l, const cv::M
     _img_r.convertTo(tmp_img, CV_32F);
     raw_img_r.upload(tmp_img);
 
-    cv::gpu::remap(raw_img_r, img_r, map1_r, map2_r, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+    cv::cuda::remap(raw_img_r, img_r, map1_r, map2_r, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 
 #if BENCHMARK
     img_r.download(tmp_img);

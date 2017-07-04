@@ -1,6 +1,7 @@
 #pragma once
 
-#include <cstring>
+#include <string>
+#include <cmath>
 #include <ros/ros.h>
 
 #define DOWNSAMPLE 1

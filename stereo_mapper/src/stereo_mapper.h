@@ -1,7 +1,8 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
+//#include <opencv2/gpu/gpu.hpp>
+#include <opencv2/core/cuda.hpp>
 #include <ros/console.h>
 
 #include "parameters.h"
@@ -22,15 +23,15 @@ class StereoMapper
 
     cv::Mat output();
 
-    cv::gpu::GpuMat raw_img_l, raw_img_r;
-    cv::gpu::GpuMat img_l, img_r, img_warp, img_diff;
+    cv::cuda::GpuMat raw_img_l, raw_img_r;
+    cv::cuda::GpuMat img_l, img_r, img_warp, img_diff;
 
-    cv::gpu::GpuMat raw_cost, sgm_cost;
-    cv::gpu::GpuMat dep;
-    cv::gpu::GpuMat tmp;
+    cv::cuda::GpuMat raw_cost, sgm_cost;
+    cv::cuda::GpuMat dep;
+    cv::cuda::GpuMat tmp;
 
-    cv::gpu::GpuMat map1_l, map2_l;
-    cv::gpu::GpuMat map1_r, map2_r;
+    cv::cuda::GpuMat map1_l, map2_l;
+    cv::cuda::GpuMat map1_r, map2_r;
 
     cv::Mat nK1, nK2;
 
