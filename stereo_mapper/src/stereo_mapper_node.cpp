@@ -568,7 +568,8 @@ void callback_raw_image(
     const sensor_msgs::ImageConstPtr &img_l_msg,
     const sensor_msgs::ImageConstPtr &img_r_msg)
 {
-//    ROS_INFO("save images with header: %f", img_l_msg->header.stamp.toSec());
+    ROS_INFO("save images with header: %f", img_l_msg->header.stamp.toSec());
+    ROS_INFO_STREAM(img_l_msg->header.stamp.toNSec());
     cv_bridge::CvImagePtr img_l_ptr = cv_bridge::toCvCopy(img_l_msg, sensor_msgs::image_encodings::MONO8);
     img_pool[std::to_string(img_l_ptr->header.stamp.toNSec())] = img_l_ptr->image.clone();
     cv_bridge::CvImagePtr img_r_ptr = cv_bridge::toCvCopy(img_r_msg, sensor_msgs::image_encodings::MONO8);
