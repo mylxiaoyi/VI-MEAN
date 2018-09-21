@@ -32,7 +32,7 @@ find_package(CUDA REQUIRED)
 
 #set(CUDA_NVCC_COMPILE_DEFINITIONS "@CUDA_NVCC_COMPILE_DEFINITIONS@")
 set(CUDA_NVCC_COMPILE_DEFINITIONS "")
-set(CUDA_HOST_COMPILER "/usr/bin/gcc-5")
+#set(CUDA_HOST_COMPILER "/usr/bin/gcc-5")
 set(CUDA_NVCC_FLAGS
     "-std=c++11 -O3 -gencode arch=compute_61,code=sm_61"  # gtx 980 Ti / 1080
     )

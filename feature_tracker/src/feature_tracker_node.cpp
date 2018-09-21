@@ -248,44 +248,44 @@ void process()
                 ROS_DEBUG("publish %f, at %f", feature_points->header.stamp.toSec(), ros::Time::now().toSec());
                 pub_img.publish(feature_points);
 
-//                if (SHOW_TRACK)
-//                {
-//                    //ptr = cv_bridge::cvtColor(ptr, sensor_msgs::image_encodings::BGR8);
+                if (SHOW_TRACK)
+                {
+                    //ptr = cv_bridge::cvtColor(ptr, sensor_msgs::image_encodings::BGR8);
 
-//                    cv::Mat stereo_img(ROW * NUM_OF_CAM, COL, CV_8UC3);
-//                    //cv::Mat stereo_img = ptr->image;
+                    cv::Mat stereo_img(ROW * NUM_OF_CAM, COL, CV_8UC3);
+                    //cv::Mat stereo_img = ptr->image;
 
-//                    for (int i = 0; i < NUM_OF_CAM; i++)
-//                    {
-//                        cv::Mat tmp_img = stereo_img.rowRange(i * ROW, (i + 1) * ROW);
-//                        cv::cvtColor(trackerData[i].cur_img, tmp_img, CV_GRAY2RGB);
-//                        if (i != 1 || !STEREO_TRACK)
-//                        {
-//                            for (unsigned int j = 0; j < trackerData[i].cur_pts.size(); j++)
-//                            {
-//                                double len = std::min(1.0, 1.0 * trackerData[i].track_cnt[j] / WINDOW_SIZE);
-//                                cv::circle(tmp_img, trackerData[i].cur_pts[j], 2, cv::Scalar(255 * (1 - len), 0, 255 * len), 2);
-//                                char name[10];
-//                                sprintf(name, "%d", trackerData[i].ids[j]);
-//                                cv::putText(tmp_img, name, trackerData[i].cur_pts[j], cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
-//                            }
-//                        }
-//                        else
-//                        {
-//                            for (unsigned int j = 0; j < trackerData[i].cur_pts.size(); j++)
-//                            {
-//                                if (r_status[j])
-//                                {
-//                                    cv::circle(tmp_img, trackerData[i].cur_pts[j], 2, cv::Scalar(0, 255, 0), 2);
-//                                    cv::line(stereo_img, trackerData[i - 1].cur_pts[j], trackerData[i].cur_pts[j] + cv::Point2f(0, ROW), cv::Scalar(0, 255, 0));
-//                                }
-//                            }
-//                        }
-//                    }
-//                    cv::imshow("vis", stereo_img);
-//                    cv::waitKey(5);
-//                    //pub_match.publish(ptr->toImageMsg());
-//                }
+                    for (int i = 0; i < NUM_OF_CAM; i++)
+                    {
+                        cv::Mat tmp_img = stereo_img.rowRange(i * ROW, (i + 1) * ROW);
+                        cv::cvtColor(trackerData[i].cur_img, tmp_img, CV_GRAY2RGB);
+                        if (i != 1 || !STEREO_TRACK)
+                        {
+                            for (unsigned int j = 0; j < trackerData[i].cur_pts.size(); j++)
+                            {
+                                double len = std::min(1.0, 1.0 * trackerData[i].track_cnt[j] / WINDOW_SIZE);
+                                cv::circle(tmp_img, trackerData[i].cur_pts[j], 2, cv::Scalar(255 * (1 - len), 0, 255 * len), 2);
+                                char name[10];
+                                sprintf(name, "%d", trackerData[i].ids[j]);
+                                cv::putText(tmp_img, name, trackerData[i].cur_pts[j], cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+                            }
+                        }
+                        else
+                        {
+                            for (unsigned int j = 0; j < trackerData[i].cur_pts.size(); j++)
+                            {
+                                if (r_status[j])
+                                {
+                                    cv::circle(tmp_img, trackerData[i].cur_pts[j], 2, cv::Scalar(0, 255, 0), 2);
+                                    cv::line(stereo_img, trackerData[i - 1].cur_pts[j], trackerData[i].cur_pts[j] + cv::Point2f(0, ROW), cv::Scalar(0, 255, 0));
+                                }
+                            }
+                        }
+                    }
+                    cv::imshow("vis", stereo_img);
+                    cv::waitKey(5);
+                    //pub_match.publish(ptr->toImageMsg());
+                }
             }
 
             FeatureTracker::img_cnt = (FeatureTracker::img_cnt + 1) % FREQ;

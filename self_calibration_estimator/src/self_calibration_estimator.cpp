@@ -5,7 +5,7 @@ SelfCalibrationEstimator::SelfCalibrationEstimator()
       g_cnt{0}, first_imu{false},
       frame_count{0}, inv_cnt{0},
       sum_of_outlier{0}, sum_of_diverge{0}, sum_of_back{0}, sum_of_front{0}, sum_of_invalid{0},
-      img_graph{1000, 1050, CV_8UC3},
+//      img_graph{1000, 1050, CV_8UC3},
       f_manager{Rs},
       is_valid{true}, is_key{true}, ready_mapping{false},
       last_marginalization_factor{nullptr}
@@ -14,6 +14,7 @@ SelfCalibrationEstimator::SelfCalibrationEstimator()
 
     clearState();
 
+    img_graph = cv::Mat(1000, 1050, CV_8UC3);
     img_graph = cv::Scalar(0, 0, 0);
     img_graph.colRange(500, 550) = cv::Scalar(0, 0, 0);
 

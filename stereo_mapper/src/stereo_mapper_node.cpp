@@ -253,12 +253,12 @@ void sendCloud(const cv::Mat &dense_points_, const cv::Mat &un_img_l0)
     }
     pub_point_cloud2.publish(points);
 
-    static int count = 0;
-    char buf[200];
-    snprintf(buf, 200, "%06d.pcd", count++);
-    pcl::PointCloud<pcl::PointXYZ> pc;
-    pcl::fromROSMsg(*points, pc);
-    pcl::io::savePCDFile("/home/mylxiaoyi/work/ros_vins/points/"+std::string(buf), pc);
+//    static int count = 0;
+//    char buf[200];
+//    snprintf(buf, 200, "%06d.pcd", count++);
+//    pcl::PointCloud<pcl::PointXYZ> pc;
+//    pcl::fromROSMsg(*points, pc);
+//    pcl::io::savePCDFile("/home/mylxiaoyi/work/ros_vins/points/"+std::string(buf), pc);
 }
 int image_id = 0;
 

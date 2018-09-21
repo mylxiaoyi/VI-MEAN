@@ -309,7 +309,7 @@ void debug_callback(const diagnostic_msgs::KeyValueConstPtr &key_value_msg)
 
 int main(int argc, char **argv)
 {
-    google::InitGoogleLogging(argv[0]);
+//    google::InitGoogleLogging(argv[0]);
     ros::init(argc, argv, "self_calibration_estimator");
     ros::NodeHandle n("~");
     ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
